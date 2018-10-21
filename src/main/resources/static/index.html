@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="文件上传与管理">
+    <meta name="author" content="upload.sbx0.cn">
+    <link rel="icon" href="img/favicon.png">
+
+    <title>航天港 - sbx0.cn</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/cover.css" rel="stylesheet">
+    <link href="css/base.css" rel="stylesheet">
+</head>
+
+<body class="text-center">
+
+<div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <h3 class="masthead-brand">航天港</h3>
+            <nav class="nav nav-masthead justify-content-center">
+                <a class="nav-link active" href="#">首页</a>
+                <a class="nav-link" href="http://space.sbx0.cn/">空间站</a>
+                <a class="nav-link" href="http://space.sbx0.cn/login.html">登陆</a>
+            </nav>
+        </div>
+    </header>
+
+    <main role="main" class="inner cover">
+        <h1 class="cover-heading">上传并分享文件</h1>
+        <p class="lead">
+            上传获取文件链接<br>无限分享你的喜悦
+        </p>
+        <form method="POST" enctype="multipart/form-data" action="/upload" class="mb-5">
+            <div class="form-group">
+                <input id="file" name="file" type="file" class="form-control-file">
+            </div>
+            <button id="uploadBtn" type="submit" class="btn btn-secondary">上传</button>
+        </form>
+        <small class="form-text text-muted">
+            <p>
+                仅支持
+            </p>
+            <p>
+                ".jpg", ".png", ".gif", ".zip", ".doc", ".pdf", ".txt", ".md", ".mp4"
+            </p>
+            <p>
+                且小于
+            </p>
+            <p>
+                1000Mb
+            </p>
+        </small>
+    </main>
+
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+            <p>sbx0 个人网站 2017 - 2018</p>
+        </div>
+    </footer>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="js/jquery-3.2.1.slim.min.js"></script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>
