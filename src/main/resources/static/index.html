@@ -15,6 +15,7 @@
     <!-- Custom styles for this template -->
     <link href="css/cover.css" rel="stylesheet">
     <link href="css/base.css" rel="stylesheet">
+    <link href="css/webuploader.css" rel="stylesheet">
 </head>
 
 <body class="text-center">
@@ -36,24 +37,25 @@
         <p class="lead">
             上传获取文件链接<br>无限分享你的喜悦
         </p>
-        <form method="POST" enctype="multipart/form-data" action="/upload" class="mb-5">
-            <div class="form-group">
-                <input id="file" name="file" type="file" class="form-control-file">
+        <div id="uploader" class="wu-example mb-3">
+            <!--用来存放文件信息-->
+            <div id="thelist" class="uploader-list"></div>
+            <div class="btns">
+                <div id="picker">选择文件</div>
             </div>
-            <button id="uploadBtn" type="submit" class="btn btn-secondary">上传</button>
-        </form>
+        </div>
+        <div id="share" class="mb-3">
+            <div class="form-group">
+                <input id="url" name="url" type="text" class="form-control">
+            </div>
+            <button id="copyBtn" type="button" class="btn btn-secondary">复制</button>
+        </div>
         <small class="form-text text-muted">
             <p>
-                仅支持
+                支持大文件上传，妙传
             </p>
             <p>
-                ".jpg", ".png", ".gif", ".zip", ".doc", ".pdf", ".txt", ".md", ".mp4"
-            </p>
-            <p>
-                且小于
-            </p>
-            <p>
-                1000Mb
+                需要登陆
             </p>
         </small>
     </main>
@@ -69,9 +71,11 @@
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="js/jquery-3.2.1.slim.min.js"></script>
+<script src="js/jquery-3.1.1.min.js"></script>
 <script src="js/popper.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/md5.js"></script>
+<script src="js/webuploader.min.js"></script>
 <script src="js/index.js"></script>
 </body>
 </html>
