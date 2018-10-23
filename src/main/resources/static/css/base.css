@@ -1,4 +1,3 @@
-input[type="file" i] {
-    margin: auto auto;
-    width: 100%;
+.auto {
+    height: auto;
 }

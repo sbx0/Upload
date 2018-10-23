@@ -25,7 +25,7 @@ WebUploader.Uploader.register({
                 } else if (status == 1) {
                     var name = response.name;
                     var type = response.type;
-                    var url = location.href + "file/" + type + "/" + name;
+                    var url = "http://" + window.location.host + "/file/" + type + "/" + name;
                     $("#share").toggle();
                     $("#url").val(url);
                     $('#' + file.id).find('p.state').text("秒传成功");
@@ -83,7 +83,7 @@ WebUploader.Uploader.register({
                     var status = response.status;
                     if (status == 0) {
                         var url = response.url
-                        url = location.href + "file/" + url;
+                        url = "http://" + window.location.host + "/file/" + url;
                         $("#share").toggle();
                         $("#url").val(url);
                         $('#' + file.id).find('p.state').text("上传成功");

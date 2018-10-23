@@ -2,16 +2,20 @@ package cn.sbx0.upload.controller;
 
 import java.io.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import cn.sbx0.upload.entity.UploadFile;
 import cn.sbx0.upload.entity.User;
+import cn.sbx0.upload.service.BaseService;
 import cn.sbx0.upload.service.UploadFileService;
 import cn.sbx0.upload.service.LogService;
 import cn.sbx0.upload.service.UserService;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -190,15 +194,17 @@ public class UploadFileController extends BaseController {
             File file = new File(path + "/temp/" + md5File);
             if (file.isDirectory()) {
                 File[] childFiles = file.listFiles();
-                // 文件夹没有内容,删除文件夹
-                if (childFiles == null || childFiles.length == 0) {
-                    file.delete();
+                // 文件夹有内容,先删除内容
+                if (!(childFiles == null || childFiles.length == 0)) {
+                    // 删除文件夹内容
+                    boolean reslut = true;
+                    for (File item : file.listFiles()) {
+                        reslut = reslut && item.delete();
+                    }
                 }
-                // 删除文件夹内容
-                boolean reslut = true;
-                for (File item : file.listFiles()) {
-                    reslut = reslut && item.delete();
-                }
+                // 删除文件夹
+                file = new File(path + "/temp/" + md5File);
+                file.delete();
             }
         } catch (Exception e) {
             objectNode.put("status", 1);
@@ -228,17 +234,41 @@ public class UploadFileController extends BaseController {
      * @return
      */
     @RequestMapping("/list")
-    @ResponseBody
-    public String list(HttpServletRequest request) {
+    public String list(Integer page, Integer size, String sort, String direction, String type, Map<String, Object> map, HttpServletRequest request) {
         // 从cookie中获取登陆用户信息
         User user = userService.getCookieUser(request);
         // 日志记录
         logService.log(user, request);
-        // 未登录
-        if (user == null) return null;
-
-        String list = fileUploadService.getFile(fileUploadService.path);
-        return list;
+        if (user == null) return "error";
+        else {
+            if (page == null) page = 1;
+            if (size == null) size = 50;
+            if (BaseService.checkNullStr(sort)) sort = "id";
+            if (BaseService.checkNullStr(direction)) direction = "desc";
+            // 物理手段的文件列表
+            // String list = fileUploadService.getFile(fileUploadService.path);
+            // 获取数据库中的文件列表
+            Page<UploadFile> uploadFiles = fileUploadService.findAll(page - 1, size, sort, direction, type);
+            if (uploadFiles != null) {
+                // 当页数大于总页数时，查询最后一页的数据
+                if (page > uploadFiles.getTotalPages()) {
+                    uploadFiles = fileUploadService.findAll(uploadFiles.getTotalPages() - 1, size, sort, direction, type);
+                }
+                map.put("size", uploadFiles.getPageable().getPageSize());
+                map.put("page", uploadFiles.getPageable().getPageNumber() + 1);
+                map.put("sort", sort);
+                map.put("direction", direction);
+                map.put("type", type);
+                map.put("lists", uploadFiles.getContent());
+                map.put("totalPages", uploadFiles.getTotalPages());
+                map.put("totalElements", uploadFiles.getTotalElements());
+                // 判断上下页
+                if (page + 1 <= uploadFiles.getTotalPages()) map.put("next_page", page + 1);
+                if (page - 1 > 0) map.put("prev_page", page - 1);
+                if (page - 1 > uploadFiles.getTotalPages()) map.put("prev_page", null);
+            }
+        }
+        return "list";
     }
 
 }

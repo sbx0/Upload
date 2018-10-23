@@ -1,5 +1,7 @@
 package cn.sbx0.upload.service;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,6 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BaseService {
+
+	private static String DOMAIN; // 域名
+	private static String KEY; // KEY
 
 	/**
 	 * 去html标签
@@ -36,23 +41,6 @@ public class BaseService {
 		return content;
 	}
 
-	/**
-	 * cookie 创建
-	 *
-	 * @param name
-	 * @param value
-	 * @param day
-	 * @return
-	 */
-	public static Cookie createCookie(String name, String value, int day) {
-		Cookie cookie = new Cookie(name, value);
-		cookie.setDomain("*.sbx0.cn");
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-		cookie.setMaxAge(day * 24 * 60 * 60);
-		return cookie;
-	}
-
 
 	/**
 	 * cookie 验证加密
@@ -61,28 +49,8 @@ public class BaseService {
 	 * @return
 	 */
 	public static String getKey(int id) {
-		String key = "CHINA NO.1";
-		String result = getHash(key + id, "MD5");
+		String result = getHash(id + KEY, "MD5");
 		return result;
-	}
-
-	/**
-	 * 清除cookies
-	 *
-	 * @param cookies
-	 * @param response
-	 * @return
-	 */
-	public static boolean removeCookies(Cookie[] cookies, HttpServletResponse response) {
-		if (cookies == null) return false;
-		for (int i = 0; i < cookies.length; i++) {
-			if (cookies[i] == null) continue;
-			cookies[i].setValue(null);
-			cookies[i].setMaxAge(0);
-			cookies[i].setPath("/");
-			response.addCookie(cookies[i]);
-		}
-		return true;
 	}
 
 	/**
@@ -187,5 +155,15 @@ public class BaseService {
 		}
 		return null;
 	}
+
+    @Value("${sbx0.DOMAIN}")
+    public void setDomain(String domain) {
+        DOMAIN = domain;
+    }
+
+    @Value("${sbx0.KEY}")
+    public void setKEY(String key) {
+        KEY = key;
+    }
 
 }

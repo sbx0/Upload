@@ -3,12 +3,10 @@ package cn.sbx0.upload.service;
 import cn.sbx0.upload.dao.UserDao;
 import cn.sbx0.upload.entity.User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
  * 用户服务层
@@ -28,60 +26,7 @@ public class UserService extends BaseService {
         return userDao.findById(id).get();
     }
 
-    /**
-     * 登陆 / 注册
-     *
-     * @param user
-     * @return
-     */
-    @Transactional
-    public User login(User user, String code) {
-        user.setName(BaseService.killHTML(user.getName()));
-        // 密码加密
-        user.setPassword(getHash(user.getPassword(), "MD5"));
-        // 用户不存在 直接注册并登陆
-        if (!existByName(user.getName())) {
-            // 邀请码为空注册失败
-            if (!code.equals("IsPantuPaQiuNa"))
-                return null;
-            // 密码加密
-            user.setRegisterTime(new Date());
-            user.setAuthority(1);
-            user.setLevel(0);
-            user.setIntegral(0.0);
-            user.setExp_max(100.0);
-            user.setExp(0.0);
-            // 注册
-            userDao.save(user);
-        }
-        // 查询数据库内的用户数据
-        User databaseUser = userDao.findByName(user.getName());
-        // 密码是否正确
-        if (user.getPassword().equals(databaseUser.getPassword())) {
-            return databaseUser;
-        } else return null;
-    }
-
     // 辅助方法
-
-    /**
-     * 判断用户是否有权限操作
-     */
-    public boolean checkAuthority(User user, int id, int type) {
-        if (user == null) return false;
-        if (id <= 0) return false;
-        if (type < 0) return false;
-        switch (type) {
-            // 文章
-            case 0:
-                if (user.getAuthority() == 0) return true;
-                if (user.getId() == id) return true;
-                break;
-            default:
-                return false;
-        }
-        return false;
-    }
 
     /**
      * 根据用户名判断用户是否存在

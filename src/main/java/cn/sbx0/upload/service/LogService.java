@@ -56,31 +56,6 @@ public class LogService extends BaseService {
     }
 
     /**
-     * 查询全部
-     *
-     * @param page
-     * @param size
-     * @return
-     */
-    public Page<Log> findAll(Integer page, Integer size) {
-        // 页数控制
-        if (page > 9999) page = 9999;
-        if (page < 0) page = 0;
-        // 条数控制
-        if (size > 1000) size = 1000;
-        if (size < 1) size = 1;
-        if (size == 0) size = 10;
-        // 分页配置
-        Sort sort = new Sort(Sort.Direction.DESC, "id");
-        Pageable pageable = PageRequest.of(page, size, sort);
-        try {
-            return logDao.findAll(pageable);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
      * 保存日志
      *
      * @param log

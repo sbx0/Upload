@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/data/jaxb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="sbx0 文件列表">
+    <meta name="author" content="upload.sbx0.cn">
+    <link rel="icon" th:href="@{~/img/favicon.png}">
+
+    <title>文件列表 - upload.sbx0.cn</title>
+
+    <link rel="stylesheet" th:href="@{~/css/bootstrap.min.css}">
+
+    <link th:href="@{~/css/cover.css}" rel="stylesheet">
+    <link th:href="@{~/css/base.css}" rel="stylesheet">
+
+</head>
+
+<body class="text-center auto">
+
+<div class="container cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <p class="masthead-brand">
+                <strong>
+                    航天港
+                </strong>
+            </p>
+            <nav class="nav nav-masthead justify-content-center">
+                <a class="nav-link" href="index.html">首页</a>
+                <a class="nav-link active" href="../list">列表</a>
+                <a class="nav-link" href="http://space.sbx0.cn/">空间站</a>
+                <a class="nav-link" href="http://space.sbx0.cn/login.html">登陆</a>
+            </nav>
+        </div>
+    </header>
+
+    <main role="main" class="inner cover mt-2">
+
+        <div class="btn-group" role="group" th:unless="${lists != null}">
+            <a class="nav-link active" href="../list">结果为空，点击返回</a>
+        </div>
+
+        <div class="btn-group" role="group" th:if="${lists != null}">
+            <a th:href="'?page=1&size=' + ${size} + '&sort=' + ${sort} + '&direction=asc' + '&type=' + ${type}"
+               class="btn btn-default btn-sm">正序</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=' + ${sort} + '&direction=desc' + '&type=' + ${type}"
+               class="btn btn-default btn-sm">逆序</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=size&direction=' + ${direction} + '&type=' + ${type}"
+               class="btn btn-default btn-sm">大小</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=time&direction=' + ${direction} + '&type=' + ${type}"
+               class="btn btn-default btn-sm">时间</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=ext&direction=' + ${direction} + '&type=' + ${type}"
+               class="btn btn-default btn-sm">后缀</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=type&direction=' + ${direction} + '&type=' + ${type}"
+               class="btn btn-default btn-sm">种类</a>
+        </div>
+
+        <p></p>
+
+        <div class="btn-group mb-3" role="group" th:if="${lists != null}">
+            <a th:href="'?page=1&size=' + ${size} + '&sort=size&direction=' + ${direction} + '&type=image'"
+               class="btn btn-default btn-sm">仅图片</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=size&direction=' + ${direction} + '&type=video'"
+               class="btn btn-default btn-sm">仅视频</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=size&direction=' + ${direction} + '&type=doc'"
+               class="btn btn-default btn-sm">仅文档</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=size&direction=' + ${direction} + '&type=zip'"
+               class="btn btn-default btn-sm">仅压缩</a>
+            <a th:href="'?page=1&size=' + ${size} + '&sort=size&direction=' + ${direction} + '&type=other'"
+               class="btn btn-default btn-sm">其他</a>
+        </div>
+
+        <div th:each="list,stat:${lists}" class="mb-3">
+            <a th:href="${'../file/' + list?.type + '/' +  list?.name}">
+                <h5 th:text="${list?.originalName}"></h5>
+            </a>
+            &nbsp;
+            <span th:text="${list?.ext}"></span>
+            &nbsp;
+            <span th:text="${list?.type}"></span>
+            &nbsp;
+            <span th:text="${list?.size}"></span>
+            &nbsp;
+            <span th:text="${list?.time}"></span>
+            &nbsp;
+        </div>
+
+        <nav th:if="${lists != null}" class="text-center mb-5">
+            <a th:if="${prev_page != null}"
+               th:href="'?page=' + ${prev_page} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction} + '&type=' + ${type}"
+               class="btn btn-sm btn-outline-primary float-left">
+                上一页
+            </a>
+            <a th:unless="${prev_page != null}"
+               class="btn btn-sm btn-outline-primary float-left disabled">
+                上一页
+            </a>
+            <a th:if="${page != null}" href="javascript:void(0)" th:text="${page} + '/' + ${totalPages}"></a>
+            <a th:if="${next_page != null}"
+               th:href="'?page=' + ${next_page} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction} + '&type=' + ${type}"
+               class="btn btn-sm btn-outline-primary float-right">
+                下一页
+            </a>
+            <a th:unless="${next_page != null}"
+               class="btn btn-sm btn-outline-primary float-right disabled">
+                下一页
+            </a>
+        </nav>
+
+    </main>
+
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+            <p>sbx0 个人网站 2017 - 2018</p>
+        </div>
+    </footer>
+</div>
+
+<script th:src="@{~/js/jquery-3.1.1.min.js}"></script>
+<script th:src="@{~/js/popper.min.js}"></script>
+<script th:src="@{~/js/bootstrap.min.js}"></script>
+</body>
+</html>

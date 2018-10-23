@@ -4,12 +4,17 @@ import cn.sbx0.upload.dao.UploadFileDao;
 
 import cn.sbx0.upload.entity.UploadFile;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class UploadFileService {
@@ -18,6 +23,79 @@ public class UploadFileService {
     @Value("${file.uploadFolder}")
     public String path; // 上传路径
 
+    /**
+     * 文件列表
+     *
+     * @param page
+     * @param size
+     * @return
+     */
+    public Page<UploadFile> findAll(Integer page, Integer size, String sort, String direction, String type) {
+        // 页数控制
+        if (page > 9999) page = 9999;
+        if (page < 0) page = 0;
+        // 条数控制
+        if (size > 1000) size = 1000;
+        if (size < 1) size = 1;
+        if (size == 0) size = 10;
+        switch (sort) {
+            case "id":
+            case "ext":
+            case "type":
+            case "size":
+            case "time":
+                break;
+            default:
+                sort = "id";
+
+        }
+        Sort s;
+        switch (direction) {
+            case "desc":
+                s = new Sort(Sort.Direction.DESC, sort);
+                break;
+            case "asc":
+                s = new Sort(Sort.Direction.ASC, sort);
+                break;
+            default:
+                s = new Sort(Sort.Direction.DESC, sort);
+
+        }
+        Pageable pageable = PageRequest.of(page, size, s);
+        try {
+            // 分页查询
+            Page<UploadFile> uploadFiles;
+            if (BaseService.checkNullStr(type))
+                uploadFiles = uploadFileDao.findAll(pageable);
+            else {
+                switch (type) {
+                    case "image":
+                    case "video":
+                    case "doc":
+                    case "zip":
+                    case "other":
+                        uploadFiles = uploadFileDao.findAllByType(type, pageable);
+                        break;
+                    default:
+                        uploadFiles = uploadFileDao.findAll(pageable);
+                }
+            }
+            if (uploadFiles.getContent().size() > 0)
+                return uploadFiles;
+            else
+                return null;
+        } catch (Exception e) {
+            return null;
+        }
+
+    }
+
+    /**
+     * 保存文件数据到数据库中
+     *
+     * @param uploadFile
+     * @return
+     */
     public boolean save(UploadFile uploadFile) {
         try {
             uploadFileDao.save(uploadFile);
@@ -89,7 +167,7 @@ public class UploadFileService {
         File[] array = file.listFiles();
         for (int i = 0; i < array.length; i++) {
             if (array[i].isFile()) {
-                list += array[i].getPath() + "<br>";
+                list += array[i].getPath();
             } else if (array[i].isDirectory()) {
                 list += getFile(array[i].getPath());
             }
