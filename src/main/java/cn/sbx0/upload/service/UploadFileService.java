@@ -3,25 +3,50 @@ package cn.sbx0.upload.service;
 import cn.sbx0.upload.dao.UploadFileDao;
 
 import cn.sbx0.upload.entity.UploadFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 @Service
-public class UploadFileService {
-    @Resource
+public class UploadFileService extends BaseService<UploadFile, Integer> {
+    @Autowired
     private UploadFileDao uploadFileDao;
+
+    @Override
+    public PagingAndSortingRepository<UploadFile, Integer> getDao() {
+        return uploadFileDao;
+    }
+
     @Value("${file.uploadFolder}")
     public String path; // 上传路径
+
+    public String getPath() {
+        return path;
+    }
+
+    public boolean deleteFile(UploadFile uploadFile) {
+        try {
+            File file = new File(path + "/" + uploadFile.getType() + "/" + uploadFile.getName());
+            System.out.println(file.getPath());
+            if (file.delete()) {
+                System.out.println(file.getName() + " is deleted!");
+            } else {
+                System.out.println("Delete operation is failed.");
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 文件列表

@@ -2,7 +2,6 @@ package cn.sbx0.upload.controller;
 
 import java.io.*;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -14,7 +13,9 @@ import cn.sbx0.upload.service.BaseService;
 import cn.sbx0.upload.service.UploadFileService;
 import cn.sbx0.upload.service.LogService;
 import cn.sbx0.upload.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,18 +23,48 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 文件上传的Controller
- *
- * @author 单红宇(CSDN CATOOP)
- * @create 2017年3月11日
  */
 @Controller
-public class UploadFileController extends BaseController {
-    @Resource
-    private UploadFileService fileUploadService;
+public class UploadFileController extends BaseController<UploadFile, Integer> {
+    @Autowired
+    private UploadFileService uploadFileService;
     @Resource
     private UserService userService;
     @Resource
     private LogService logService;
+
+    @Autowired
+    public UploadFileController(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    @Override
+    public BaseService<UploadFile, Integer> getService() {
+        return uploadFileService;
+    }
+
+    @Override
+    public ObjectNode delete(Integer id, HttpServletRequest request) {
+        UploadFile uploadFile = uploadFileService.findById(id);
+        if (uploadFile == null) {
+            json.put(STATUS_NAME, STATUS_CODE_NOT_FOUND);
+            return json;
+        } else {
+            // 从cookie中获取登陆用户信息
+            User user = userService.getCookieUser(request);
+            if (user != null && user.getAuthority() == 0) {
+                if (uploadFileService.deleteFile(uploadFile)) {
+                    return super.delete(id, request);
+                } else {
+                    json.put(STATUS_NAME, STATUS_CODE_FILED);
+                    return json;
+                }
+            } else {
+                json.put(STATUS_NAME, STATUS_CODE_NO_PERMISSION);
+                return json;
+            }
+        }
+    }
 
     /**
      * 1. 匹配md5检查文件存在与否
@@ -46,27 +77,27 @@ public class UploadFileController extends BaseController {
     @ResponseBody
     public ObjectNode md5Check(@RequestParam(value = "md5File") String md5File,
                                HttpServletRequest request) {
-        objectNode = mapper.createObjectNode();
+        json = mapper.createObjectNode();
         // 从cookie中获取登陆用户信息
         User user = userService.getCookieUser(request);
         // 日志记录
         logService.log(user, request);
         // 未登录 直接否
         if (user == null) {
-            objectNode.put("status", 2);
-            objectNode.put("msg", "未登录");
-            return objectNode;
+            json.put("status", 2);
+            json.put("msg", "未登录");
+            return json;
         }
-        UploadFile uploadFile = fileUploadService.md5Check(md5File);
+        UploadFile uploadFile = uploadFileService.md5Check(md5File);
         if (uploadFile != null) {
-            objectNode.put("status", 1);
-            objectNode.put("oName", uploadFile.getOriginalName());
-            objectNode.put("name", uploadFile.getName());
-            objectNode.put("type", uploadFile.getType());
+            json.put("status", 1);
+            json.put("oName", uploadFile.getOriginalName());
+            json.put("name", uploadFile.getName());
+            json.put("type", uploadFile.getType());
         } else {
-            objectNode.put("status", 0);
+            json.put("status", 0);
         }
-        return objectNode;
+        return json;
     }
 
     /**
@@ -87,7 +118,7 @@ public class UploadFileController extends BaseController {
         // 未登录 直接否
         if (user == null) return false;
         Boolean exist = false;
-        String path = fileUploadService.path + "/temp/" + md5File + "/";//分片存放目录
+        String path = uploadFileService.getPath() + "/temp/" + md5File + "/";//分片存放目录
         String chunkName = chunk + ".tmp";//分片名
         File file = new File(path + chunkName);
         if (file.exists()) {
@@ -116,7 +147,7 @@ public class UploadFileController extends BaseController {
         // 未登录 直接否
         if (user == null) return false;
 
-        String path = fileUploadService.path + "/temp/" + md5File + "/";
+        String path = uploadFileService.getPath() + "/temp/" + md5File + "/";
         File dirFile = new File(path);
         if (!dirFile.exists()) { // 目录不存在，创建目录
             dirFile.mkdirs();
@@ -160,23 +191,23 @@ public class UploadFileController extends BaseController {
                             @RequestParam(value = "md5File") String md5File,
                             @RequestParam(value = "name") String name,
                             HttpServletRequest request) throws Exception {
-        ObjectNode objectNode = mapper.createObjectNode();
+        ObjectNode json = mapper.createObjectNode();
         // 从cookie中获取登陆用户信息
         User user = userService.getCookieUser(request);
         // 日志记录
         logService.log(user, request);
         // 未登录
         if (user == null) {
-            objectNode.put("status", 1);
-            return objectNode;
+            json.put("status", 1);
+            return json;
         }
 
-        String path = fileUploadService.path;
-        String fileName = fileUploadService.createFileName(name);
-        String filePath = fileUploadService.createPath(fileName);
-        objectNode.put("url", filePath);
+        String path = uploadFileService.getPath();
+        String fileName = uploadFileService.createFileName(name);
+        String filePath = uploadFileService.createPath(fileName);
+        json.put("url", filePath);
         // 合成后的文件
-        FileOutputStream fileOutputStream = new FileOutputStream(fileUploadService.path + filePath);
+        FileOutputStream fileOutputStream = new FileOutputStream(path + filePath);
 
         try {
             byte[] buf = new byte[1024];
@@ -207,9 +238,9 @@ public class UploadFileController extends BaseController {
                 file.delete();
             }
         } catch (Exception e) {
-            objectNode.put("status", 1);
+            json.put("status", 1);
         } finally {
-            objectNode.put("status", 0);
+            json.put("status", 0);
             fileOutputStream.close();
         }
 
@@ -219,13 +250,13 @@ public class UploadFileController extends BaseController {
         uploadFile.setName(fileName);
         uploadFile.setMd5(md5File);
         uploadFile.setTime(new Date());
-        uploadFile.setExt(fileUploadService.getFileExt(fileName));
-        uploadFile.setType(fileUploadService.checkType(uploadFile.getExt()));
-        File newFile = new File(fileUploadService.path + filePath);
+        uploadFile.setExt(uploadFileService.getFileExt(fileName));
+        uploadFile.setType(uploadFileService.checkType(uploadFile.getExt()));
+        File newFile = new File(uploadFileService.getPath() + filePath);
         uploadFile.setSize(newFile.length());
-        fileUploadService.save(uploadFile);
+        uploadFileService.save(uploadFile);
 
-        return objectNode;
+        return json;
     }
 
     /**
@@ -237,22 +268,21 @@ public class UploadFileController extends BaseController {
     public String list(Integer page, Integer size, String sort, String direction, String type, Map<String, Object> map, HttpServletRequest request) {
         // 从cookie中获取登陆用户信息
         User user = userService.getCookieUser(request);
-        // 日志记录
-        logService.log(user, request);
-        if (user == null) return "error";
-        else {
+        if (user == null) {
+            return "error";
+        } else {
             if (page == null) page = 1;
             if (size == null) size = 50;
             if (BaseService.checkNullStr(sort)) sort = "id";
             if (BaseService.checkNullStr(direction)) direction = "desc";
             // 物理手段的文件列表
-            // String list = fileUploadService.getFile(fileUploadService.path);
+            // String list = uploadFileService.getFile(uploadFileService.getPath());
             // 获取数据库中的文件列表
-            Page<UploadFile> uploadFiles = fileUploadService.findAll(page - 1, size, sort, direction, type);
+            Page<UploadFile> uploadFiles = uploadFileService.findAll(page - 1, size, sort, direction, type);
             if (uploadFiles != null) {
                 // 当页数大于总页数时，查询最后一页的数据
                 if (page > uploadFiles.getTotalPages()) {
-                    uploadFiles = fileUploadService.findAll(uploadFiles.getTotalPages() - 1, size, sort, direction, type);
+                    uploadFiles = uploadFileService.findAll(uploadFiles.getTotalPages() - 1, size, sort, direction, type);
                 }
                 map.put("size", uploadFiles.getPageable().getPageSize());
                 map.put("page", uploadFiles.getPageable().getPageNumber() + 1);
@@ -267,8 +297,8 @@ public class UploadFileController extends BaseController {
                 if (page - 1 > 0) map.put("prev_page", page - 1);
                 if (page - 1 > uploadFiles.getTotalPages()) map.put("prev_page", null);
             }
+            return "list";
         }
-        return "list";
     }
 
 }

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/data/jaxb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="sbx0 错误页面">
+    <meta name="author" content="sbx0">
+    <link rel="icon" th:href="@{~/img/favicon.png}">
+
+    <title>非常抱歉 | sbx0</title>
+
+    <link rel="stylesheet" th:href="@{~/css/bootstrap.min.css}">
+
+    <link th:href="@{~/css/cover.css}" rel="stylesheet">
+    <link th:href="@{~/css/base.css}" rel="stylesheet">
+
+</head>
+
+<body class="text-center">
+
+<div class="container cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <p class="masthead-brand">
+                <strong>
+                    航天港
+                </strong>
+            </p>
+            <nav class="nav nav-masthead justify-content-center">
+                <a class="nav-link" href="index.html">首页</a>
+                <a class="nav-link" href="http://space.sbx0.cn/">空间站</a>
+                <a class="nav-link" href="http://space.sbx0.cn/login.html">登陆</a>
+            </nav>
+        </div>
+    </header>
+
+    <main role="main" class="inner cover">
+
+        <div class="cover-heading">
+            <h5>非常抱歉<br>该页面无法正常显示</h5>
+            <p class="lead">
+                <span th:text="'错误:' + ${error}"></span>
+                <br>
+                <span th:text="'状态:' + ${status}"></span>
+            </p>
+            <p class="lead">
+                <br>
+                可能原因
+                <br>
+                1.发生错误
+                <br>
+                2.该页面已被删除或不存在
+                <br>
+                3.操作速度频繁
+                <br>
+                4.您无权限操作此页
+            </p>
+            <br>
+            <div>
+                <a href="../index.html" class="btn btn-danger" role="button">首页</a>
+                <a href="javascript:history.go(-1);" class="btn btn-primary" role="button">返回</a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+            <p>sbx0 个人网站 2017 - 2018</p>
+        </div>
+    </footer>
+</div>
+
+<script th:src="@{~/js/jquery-3.1.1.min.js}"></script>
+<script th:src="@{~/js/popper.min.js}"></script>
+<script th:src="@{~/js/bootstrap.min.js}"></script>
+</body>
+</html>

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="sbx0 文件列表">
-    <meta name="author" content="upload.sbx0.cn">
+    <meta name="author" content="sbx0">
     <link rel="icon" th:href="@{~/img/favicon.png}">
 
-    <title>文件列表 - upload.sbx0.cn</title>
+    <title>文件列表 | sbx0</title>
 
     <link rel="stylesheet" th:href="@{~/css/bootstrap.min.css}">
 
@@ -84,6 +84,8 @@
             &nbsp;
             <span th:text="${list?.time}"></span>
             &nbsp;
+            <a th:href="'javascript:deleteFile('+${list?.id}+')'">删除</a>
+            &nbsp;
         </div>
 
         <nav th:if="${lists != null}" class="text-center mb-5">
@@ -120,5 +122,28 @@
 <script th:src="@{~/js/jquery-3.1.1.min.js}"></script>
 <script th:src="@{~/js/popper.min.js}"></script>
 <script th:src="@{~/js/bootstrap.min.js}"></script>
+<script>
+    function deleteFile(id) {
+        $.ajax({
+            url: 'delete?id=' + id,
+            type: 'GET',
+            success: function (json) {
+                var status = json.status
+                if (status == 0) {
+                    alert("操作成功")
+                    location.replace(location.href)
+                } else {
+                    alert("操作失败")
+                }
+                return false;
+            },
+            error: function () {
+                alert("网络异常")
+                return false;
+            }
+
+        })
+    }
+</script>
 </body>
 </html>
